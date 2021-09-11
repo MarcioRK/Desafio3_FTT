@@ -10,7 +10,6 @@ import java.util.Scanner;
 
 public class XmlToJson {
 
-   
     public static void main(String[] args) throws FileNotFoundException {
         File arquivo = new File("Entrada.xml");
         Queue<String> linhas = new LinkedList<>();
@@ -38,12 +37,11 @@ public class XmlToJson {
             }
 
         } else {
-            System.out.println("Arquivo não existe. O arquivo criado de "
-                    + "Entrada deve ter o nome: \'Entrada.xml\' e deve ser alocado "
-                    + "na pasta do projeto.");
+            System.out.println("Arquivo não existe. O arquivo criado de entrada deve ter o nome: \'Entrada.xml\' e tem que estar na pasta do projeto.");
         }
     }
 
+    //Função responsável pela conversão de XML para JSON
     public static String converteJson(Queue<String> linhas) {
         
         boolean lista = false;
@@ -58,28 +56,34 @@ public class XmlToJson {
         while (!linhas.isEmpty()) {
             String linha = linhas.poll();
             linha = linha.substring(1);
-            if (linha.contains("<")) {
+            if (linha.contains("<")) {  //Possui tag de abertura e fechamento
+                //A variavel 'letras' é true quando é o fim de um array ou item de um array e possui outro após este
                 if(letras){
                     volta += ",";
                 }
+
+                //Pega a iformação até '>' e '<' e monta a estrutura aceita pelo JSON
+                //Por possuir uma tag de abertura e fechamento é selecionado o nome do campo e seu valor
                 volta += System.lineSeparator();
                 letras = true;
                 volta += "\"" + linha.substring(0, linha.indexOf('>')) + "\": \"" + 
                         linha.substring(linha.indexOf('>') + 1, linha.indexOf('<')) + 
                         "\"";
                  tagAberta = false;
-            } else if (linha.contains("/")) {
+            } else if (linha.contains("/")) {   //É uma tag de fechamento
                 letras = false;
                 tagNova = linha.substring(1, linha.length() - 1);
+                //Por ser apenas a tag de fechamento só é adicionado ']' para fechar o objeto no JSON 
                 if (lista && !tagAntiga.equals(tagNova)){
                     volta += System.lineSeparator() + "]";
                     lista = false;
                 }
                 volta += System.lineSeparator() + "}";
                 tagAberta = false;
-            } else {
+            } else { //É uma tag de abertura
                 letras = false;                
                 tagNova = linha.substring(0, linha.length() - 1);
+                //Abertura de um novo array
                 if (tagAntiga.equals(tagNova)){
                     volta += "," + System.lineSeparator() + "{";
                 }
@@ -89,6 +93,7 @@ public class XmlToJson {
                         volta = volta.substring(0, indice) + volta.substring(indice + 2);
                         lista = false;
                     }
+                    //Fim do objeto
                     if (lista){
                         volta += System.lineSeparator() + "]";
                     }
