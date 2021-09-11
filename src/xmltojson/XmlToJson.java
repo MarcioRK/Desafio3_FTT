@@ -10,10 +10,7 @@ import java.util.Scanner;
 
 public class XmlToJson {
 
-    /**
-     * @param args the command line arguments
-     * @throws java.io.FileNotFoundException
-     */
+   
     public static void main(String[] args) throws FileNotFoundException {
         File arquivo = new File("Entrada.xml");
         Queue<String> linhas = new LinkedList<>();
@@ -25,7 +22,7 @@ public class XmlToJson {
                 }
             }
 
-            String Json = converteParaJson(linhas);
+            String Json = converteJson(linhas);
             
             try
             {
@@ -34,79 +31,76 @@ public class XmlToJson {
                 try (FileWriter escritor = new FileWriter("Saida.json")) {
                     escritor.write(Json);
                 }
-                System.out.println("\nArquivo de saída criado!");
+                System.out.println("\nArquivo Completo.");
             }
             catch (IOException erro){
-                System.out.println("Ocorreu um erro!");                
+                System.out.println("Erro!!!");                
             }
 
         } else {
-            System.out.println("Arquivo de entrada não encontrado. O arquivo de "
-                    + "Entrada deve se chamar \'Entrada.xml\' e deve ser colocado "
-                    + "na pasta raiz do projeto. Garanta que seu arquivo esteja "
-                    + "bem formatado.");
+            System.out.println("Arquivo não existe. O arquivo criado de "
+                    + "Entrada deve ter o nome: \'Entrada.xml\' e deve ser alocado "
+                    + "na pasta do projeto.");
         }
     }
 
-    public static String converteParaJson(Queue<String> linhas) {
-        String retorno = "";
-        boolean elementos = false;
-        boolean listando = false;
-        boolean anteriorAbreTag = false;
-        String tagAtual;
-        String tagAnterior = "";
+    public static String converteJson(Queue<String> linhas) {
+        
+        boolean lista = false;
+        boolean letras = false;
+        boolean tagAberta = false;
+        String volta = "";
+        String tagNova;
+        String tagAntiga = "";
                 
-        retorno += "{";
+        volta += "{";
         
         while (!linhas.isEmpty()) {
             String linha = linhas.poll();
             linha = linha.substring(1);
             if (linha.contains("<")) {
-                //Tem abre e fecha tag
-                if(elementos){
-                    retorno += ",";
+                if(letras){
+                    volta += ",";
                 }
-                retorno += System.lineSeparator();
-                elementos = true;
-                retorno += "\"" + linha.substring(0, linha.indexOf('>')) + "\": \"" + 
+                volta += System.lineSeparator();
+                letras = true;
+                volta += "\"" + linha.substring(0, linha.indexOf('>')) + "\": \"" + 
                         linha.substring(linha.indexOf('>') + 1, linha.indexOf('<')) + 
                         "\"";
-                anteriorAbreTag = false;
+                 tagAberta = false;
             } else if (linha.contains("/")) {
-                //É um fecha tag
-                elementos = false;
-                tagAtual = linha.substring(1, linha.length() - 1);
-                if (listando && !tagAnterior.equals(tagAtual)){
-                    retorno += System.lineSeparator() + "]";
-                    listando = false;
+                letras = false;
+                tagNova = linha.substring(1, linha.length() - 1);
+                if (lista && !tagAntiga.equals(tagNova)){
+                    volta += System.lineSeparator() + "]";
+                    lista = false;
                 }
-                retorno += System.lineSeparator() + "}";
-                anteriorAbreTag = false;
+                volta += System.lineSeparator() + "}";
+                tagAberta = false;
             } else {
-                //É um abre tag
-                elementos = false;                
-                tagAtual = linha.substring(0, linha.length() - 1);
-                if (tagAnterior.equals(tagAtual)){
-                    retorno += "," + System.lineSeparator() + "{";
+                letras = false;                
+                tagNova = linha.substring(0, linha.length() - 1);
+                if (tagAntiga.equals(tagNova)){
+                    volta += "," + System.lineSeparator() + "{";
                 }
                 else {
-                    if(!tagAnterior.equals("") && anteriorAbreTag){
-                        int indice = retorno.lastIndexOf(tagAnterior) + tagAnterior.length() + 2;
-                        retorno = retorno.substring(0, indice) + retorno.substring(indice + 2);
-                        listando = false;
+                    if(!tagAntiga.equals("") && tagAberta){
+                        int indice = volta.lastIndexOf(tagAntiga) + tagAntiga.length() + 2;
+                        volta = volta.substring(0, indice) + volta.substring(indice + 2);
+                        lista = false;
                     }
-                    if (listando){
-                        retorno += System.lineSeparator() + "]";
+                    if (lista){
+                        volta += System.lineSeparator() + "]";
                     }
-                    retorno += System.lineSeparator() + "\"" + tagAtual + "\": [ {";
-                    listando = true;
+                    volta += System.lineSeparator() + "\"" + tagNova + "\": [ {";
+                    lista = true;
                 }
-                tagAnterior = tagAtual;
-                anteriorAbreTag = true;
+                tagAntiga = tagNova;
+                tagAberta = true;
             }
         }
-        retorno += System.lineSeparator() + "}";
+        volta += System.lineSeparator() + "}";
         
-        return retorno;
+        return volta;
     }
 }
